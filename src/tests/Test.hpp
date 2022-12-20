@@ -34,6 +34,7 @@ public:
 
 	virtual void OnUpdate(float deltaTime = 0.0f) override {}
 	virtual void OnRender() override {}
+
 	virtual void OnImGuiRender() override
 	{
 		for (auto &test : m_tests)

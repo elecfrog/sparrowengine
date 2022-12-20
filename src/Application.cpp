@@ -23,7 +23,10 @@ int main(void)
 {
 	// Init/Setup GLFW (window, contexts, OS messages processing)
 	if (!glfwInit())
-	{ std::cerr << "Error: glfwInit() fail\n"; return -1; }
+	{ 
+		std::cerr << "Error: glfwInit() fail\n"; 
+		return -1; 
+	}
 
 	glfwSetErrorCallback([](int error, const char *description) { std::cerr << "Error: " << description << std::endl; });
 
@@ -31,17 +34,23 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow *window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(960, 540, "Sparrow", NULL, NULL);
+
 	if (!window)
-	{ glfwTerminate(); return -1; }
+	{ 
+		glfwTerminate(); 
+		return -1; 
+	}
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-
 	// Init GLEW (run-time OpenGL extensions loader)
 	if (GLenum err = glewInit(); err != GLEW_OK)
-	{ std::cerr << "Error: glewInit(): " << glewGetErrorString(err) << std::endl; glfwTerminate(); return -1; }
+	{ 
+		std::cerr << "Error: glewInit(): " << glewGetErrorString(err) << std::endl; glfwTerminate(); 
+		return -1; 
+	}
 
 	// Enable OpenGL features
 	GLCall(glEnable(GL_DEBUG_OUTPUT));
@@ -86,10 +95,36 @@ int main(void)
 		testMenu->RegisterTest<test::BatchingTextures>("Batching Textures");
 		testMenu->RegisterTest<test::BatchingTexturesDynamic>("Batching Textures (dynamic)");
 
+		float positions[6] = {
+				-0.5f, -0.5f,
+				0.f, 0.5f,
+				0.5f, -0.5f
+		};
+
+		unsigned int buffer;
+		glGenBuffers(1, &buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glBufferData(GL_ARRAY_BUFFER, 6*sizeof(float), positions, GL_STREAM_DRAW);
+
+
+		glBindBuffer(0, buffer);
+
 		bool show_demo_window = false;
 		while (!glfwWindowShouldClose(window))
 		{
-			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			//GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			
+			glClear(GL_COLOR_BUFFER_BIT);
+			
+			// legacy OpenGL, just for debugging
+			//glBegin(GL_TRIANGLES);
+			//	glVertex2f(-0.5f, -0.5f);
+			//	glVertex2f(	 0.f, 0.5f);
+			//	glVertex2f(0.5f, -0.5f);
+			//glEnd();
+			
+			glDrawArrays(GL_TRIANGLES, 0, 3);
+
 			renderer.Clear();
 
 			ImGui_ImplOpenGL3_NewFrame();
@@ -136,9 +171,9 @@ int main(void)
 
 		} // while (!glfwWindowShouldClose(window))
 
-		delete currentTest;
-		if (currentTest != testMenu)
-			delete testMenu;
+		//delete currentTest;
+		//if (currentTest != testMenu)
+		//	delete testMenu;
 
 	} // Vertex-/Index-Buffer scope
 

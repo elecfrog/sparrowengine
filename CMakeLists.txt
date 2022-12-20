@@ -1,14 +1,15 @@
 ﻿cmake_minimum_required (VERSION 3.12)
 
-project (ChernoOpenGL)
+project (sparrow)
 
 # Setup project sources
 include_directories("${CMAKE_SOURCE_DIR}/src")
 
+file(GLOB_RECURSE HEADER_FILES "${CMAKE_SOURCE_DIR}/src/misc/*.h")
 file(GLOB_RECURSE HEADER_FILES "${CMAKE_SOURCE_DIR}/src/*.hpp")
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} "src/misc/vec3.h")
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 
 # Setup libraries
@@ -33,7 +34,7 @@ set(IMGUI_PATH "${CMAKE_SOURCE_DIR}/Dependencies/imgui/imgui")
 file(GLOB IMGUI_SOURCE_FILES    "${IMGUI_PATH}/*.cpp")
 set(IMGUI_BACKENDS_SOURCE_FILES "${IMGUI_PATH}/backends/imgui_impl_glfw.cpp" # api-dependend includes!
                                 "${IMGUI_PATH}/backends/imgui_impl_opengl3.cpp")
-add_library(imgui STATIC ${IMGUI_SOURCE_FILES} ${IMGUI_BACKENDS_SOURCE_FILES})
+add_library(imgui STATIC ${IMGUI_SOURCE_FILES} ${IMGUI_BACKENDS_SOURCE_FILES} "src/misc/vec3.h")
 target_include_directories(imgui PRIVATE "${IMGUI_PATH}" "${CMAKE_SOURCE_DIR}/Dependencies/glfw/include")
 
 
