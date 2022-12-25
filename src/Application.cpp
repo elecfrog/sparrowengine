@@ -18,6 +18,25 @@
 
 #include <iostream>
 
+static unsigned int CompileShader(unsigned int type, const std::string& source)
+{
+	unsigned int ID = glCreateShader(GL_VERTEX_SHADER);
+
+	const char* src = source.c_str();
+
+}
+
+static int createShader(const std::string& vertexShader, const std::string& fragmentShader)
+{
+	unsigned int program = glCreateProgram();
+
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER);
+	
+	return 1; 
+
+}
+
+
 
 int main(void)
 {
@@ -101,20 +120,24 @@ int main(void)
 				0.5f, -0.5f
 		};
 
+		//unsigned int VAO;
 		unsigned int buffer;
 		glGenBuffers(1, &buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, 6*sizeof(float), positions, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STREAM_DRAW);
+		
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
 
-		glBindBuffer(0, buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		bool show_demo_window = false;
 		while (!glfwWindowShouldClose(window))
 		{
-			//GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			
-			glClear(GL_COLOR_BUFFER_BIT);
+			//glClear(GL_COLOR_BUFFER_BIT);
 			
 			// legacy OpenGL, just for debugging
 			//glBegin(GL_TRIANGLES);
@@ -123,7 +146,7 @@ int main(void)
 			//	glVertex2f(0.5f, -0.5f);
 			//glEnd();
 			
-			glDrawArrays(GL_TRIANGLES, 0, 3);
+			//glDrawArrays(GL_TRIANGLES, 0, 3);
 
 			renderer.Clear();
 

@@ -11,6 +11,7 @@ class Renderer
 {
 public:
 	void Clear() { GLCall(glClear(GL_COLOR_BUFFER_BIT)); }
+
 	void Draw(const VertexArray &va, const IndexBuffer &ib, const Shader &shader) const
 	{
 		va.Bind();
