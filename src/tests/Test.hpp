@@ -7,9 +7,16 @@
 #include <vector>
 #include <functional>
 
+
+
+#include <GLFW/glfw3.h>
+
 namespace test
 {
 
+/*********************
+ *	Test Parent Class
+ *********************/
 class Test
 {
 public:
@@ -21,6 +28,9 @@ public:
 	virtual void OnImGuiRender() {}
 };
 
+/*********************
+ *	Test Menu Class
+ *********************/ 
 class TestMenu : public Test
 {
 	using tests_t = std::vector<std::pair<std::string, std::function<Test *()>>>;

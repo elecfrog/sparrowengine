@@ -3,9 +3,9 @@
 #include "Test.hpp"
 #include "Utility.hpp"
 
-#include "IndexBuffer.hpp"
-#include "Shader.hpp"
-#include "Texture.hpp"
+#include "IndexBuffer.h"
+#include "Shader.h"
+#include "Texture.h"
 
 #include <GL/glew.h>
 #include <imgui/imgui.h>
@@ -49,6 +49,7 @@ public:
 		GLCall(glDeleteBuffers(1, &m_arrayBuffer));
 		GLCall(glDeleteVertexArrays(1, &m_vertexArray));
 	}
+
 	BatchingTexturesDynamic()
 	{
 		GLCall(glGenVertexArrays(1, &m_vertexArray));

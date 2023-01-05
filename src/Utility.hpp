@@ -5,15 +5,14 @@
 #include <iostream>
 #include <iomanip>
 
-
 #ifdef WIN32 // debug-breakpoint/platform-specific
-#include <intrin.h>
-#define BREAKPOINT() __debugbreak()
+	#include <intrin.h>
+	#define BREAKPOINT() __debugbreak()
 #elif defined (__unix__)  || (defined (__APPLE__) && defined (__MACH__))
-#include <signal.h>
-#define BREAKPOINT() raise(SIGTRAP)
+	#include <signal.h>
+	#define BREAKPOINT() raise(SIGTRAP)
 #else // see other methods: https://stackoverflow.com/questions/173618/is-there-a-portable-equivalent-to-debugbreak-debugbreak/49079078#49079078
-//#define BREAKPOINT() // uncomment if no solutions found
+	//#define BREAKPOINT() // uncomment if no solutions found
 #endif // debug-breakpoint/platform-specific
 
 // Trigger debug breakpoint on `condition` fail

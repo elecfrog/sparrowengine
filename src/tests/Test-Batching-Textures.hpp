@@ -4,9 +4,10 @@
 #include "Utility.hpp"
 
 #include "Renderer.hpp"
-#include "VertexBuffer.hpp"
+#include "VertexBuffer.h"
 #include "VertexBufferLayout.hpp"
-#include "Texture.hpp"
+#include "Texture.h"
+#include "IndexBuffer.h"
 
 #include <GL/glew.h>
 #include <imgui/imgui.h>
@@ -41,7 +42,8 @@ public:
 	BatchingTextures()
 	{
 		// object 1
-		std::vector<float> positions1 = { // pos[x,y], color[r,g,b,a], texcoord[x,y], texidx[i], ...
+		std::vector<float> positions1 = { 
+			// pos[x,y], color[r,g,b,a], texcoord[x,y], texidx[i], ...
 			100.0f, 100.0f, 0.18f, 0.6f, 0.96f, 1.0f, 0.0f, 0.0f, 0.f, // 0
 			200.0f, 100.0f, 0.18f, 0.6f, 0.96f, 1.0f, 1.0f, 0.0f, 0.f, // 1
 			200.0f, 200.0f, 0.18f, 0.6f, 0.96f, 1.0f, 1.0f, 1.0f, 0.f, // 2
@@ -59,7 +61,8 @@ public:
 			400.0f, 200.0f, 1.0f, 0.93f, 0.24f, 1.0f, 1.0f, 1.0f, 1.f, // 6
 			300.0f, 200.0f, 1.0f, 0.93f, 0.24f, 1.0f, 0.0f, 1.0f, 1.f  // 7
 		};
-		std::vector<unsigned int> indices2 = { // must be shifted to not to corelate with `indices1`
+		std::vector<unsigned int> indices2 = { 
+			// must be shifted to not to corelate with `indices1`
 			0, 1, 2, // 4, 5, 6
 			2, 3, 0  // 6, 7, 4
 		};

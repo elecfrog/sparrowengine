@@ -7,6 +7,7 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 
 file(GLOB_RECURSE HEADER_FILES "${CMAKE_SOURCE_DIR}/src/misc/*.h")
 file(GLOB_RECURSE HEADER_FILES "${CMAKE_SOURCE_DIR}/src/*.hpp")
+file(GLOB_RECURSE HEADER_FILES "${CMAKE_SOURCE_DIR}/src/*.h")
 file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} "src/misc/vec3.h")

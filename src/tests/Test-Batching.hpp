@@ -4,8 +4,9 @@
 #include "Utility.hpp"
 
 #include "Renderer.hpp"
-#include "VertexBuffer.hpp"
+#include "VertexBuffer.h"
 #include "VertexBufferLayout.hpp"
+#include "IndexBuffer.h"
 
 #include <GL/glew.h>
 #include <imgui/imgui.h>
@@ -38,10 +39,10 @@ public:
 	{
 		// object 1
 		std::vector<float> positions1 = { // pos[x,y], color[r,g,b,a], ...
-			100.0f, 100.0f, 0.18f, 0.6f, 0.96f, 1.0f, // 0
-			200.0f, 100.0f, 0.18f, 0.6f, 0.96f, 1.0f, // 1
-			200.0f, 200.0f, 0.18f, 0.6f, 0.96f, 1.0f, // 2
-			100.0f, 200.0f, 0.18f, 0.6f, 0.96f, 1.0f  // 3
+			100.0f, 100.0f,		0.18f, 0.6f, 0.96f, 1.0f, // 0
+			200.0f, 100.0f,		0.18f, 0.6f, 0.96f, 1.0f, // 1
+			200.0f, 200.0f,		0.18f, 0.6f, 0.96f, 1.0f, // 2
+			100.0f, 200.0f,		0.18f, 0.6f, 0.96f, 1.0f  // 3
 		};
 		std::vector<unsigned int> indices1 = { // trig[v1,v2,v3...]
 			0, 1, 2,
@@ -50,20 +51,20 @@ public:
 
 		// object 2
 		std::vector<float> positions2 = {
-			300.0f, 100.0f, 1.0f, 0.93f, 0.24f, 1.0f, // 4
-			400.0f, 100.0f, 1.0f, 0.93f, 0.24f, 1.0f, // 5
-			400.0f, 200.0f, 1.0f, 0.93f, 0.24f, 1.0f, // 6
-			300.0f, 200.0f, 1.0f, 0.93f, 0.24f, 1.0f  // 7
+			300.0f, 100.0f,		1.0f, 0.93f, 0.24f, 1.0f, // 4
+			400.0f, 100.0f,		1.0f, 0.93f, 0.24f, 1.0f, // 5
+			400.0f, 200.0f,		1.0f, 0.93f, 0.24f, 1.0f, // 6
+			300.0f, 200.0f,		1.0f, 0.93f, 0.24f, 1.0f  // 7
 		};
-		std::vector<unsigned int> indices2 = { // must be shifted to not to corelate with `indices1`
+		std::vector<unsigned int> indices2 = { // must be shifted to not to correlate with `indices1`
 			0, 1, 2, // 4, 5, 6
 			2, 3, 0  // 6, 7, 4
 		};
 
 		constexpr auto coord_count = 2u; // xy
-		constexpr auto color_count = 4u; // rgba
+		constexpr auto color_count = 4u; // RGBA
 
-		// batcheding the objects
+		// batching the objects
 		std::vector<float> batched_positions;
 		batched_positions.insert(batched_positions.end(), positions1.begin(), positions1.end()); // append `pos1` buff
 		batched_positions.insert(batched_positions.end(), positions2.begin(), positions2.end()); // append `pos2` buff
@@ -72,7 +73,8 @@ public:
 		std::vector<unsigned int> batched_indices(indices1); // copy 1st buff
 		std::transform(indices2.begin(), indices2.end(), // append-shift 2nd buff
 					   std::back_inserter(batched_indices),
-					   [&](const auto &val) { return unsigned int(val + positions1.size() / (coord_count + color_count)); });
+					   [&](const auto &val) 
+			{ return unsigned int(val + positions1.size() / (coord_count + color_count)); });
 
 
 		m_vao = std::make_unique<VertexArray>();

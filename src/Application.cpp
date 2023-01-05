@@ -7,6 +7,8 @@
 #include "tests/Test-Batching.hpp"
 #include "tests/Test-Batching-Textures.hpp"
 #include "tests/Test-Batching-Textures-dynamic.hpp"
+#include "tests/Test-FlashSquare2D.hpp"
+#include "tests/Test-Going3D.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -20,104 +22,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-
-struct ShaderProgramSourceTMP
-{
-	std::string vertexSource;
-	std::string fragmentSource;
-};
-
-
-static ShaderProgramSourceTMP ParseShaderSource(const std::string& filepath)
-{
-	std::ifstream stream(filepath);
-
-	enum class ShaderType
-	{
-		NONE	 = -1,
-		VERTEX	 =  0,
-		FRAGMENT =  1
-	};
-	std::string line;
-
-	std::stringstream ss[2];
-
-	ShaderType type = ShaderType::NONE;
-
-	while (getline(stream, line))
-	{
-		if (line.find("shader") != std::string::npos)
-		{
-			if (line.find("vertex") != std::string::npos)
-				type = ShaderType::VERTEX;
-				// set mode to vertex
-			else if (line.find("fragment") != std::string::npos)
-				// set mode to fragment
-				type = ShaderType::FRAGMENT;
-
-		}
-		else
-		{
-			ss[(int)type] << line << "\n";
-		}
-	}
-
-	return { ss[0].str(), ss[1].str() };
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source)
-{
-	unsigned int ID = glCreateShader(type);
-
-	// return the pointer to source, two ways:
-	const char* src = source.c_str();
-	//const char* src = &source[0];
-
-	glShaderSource(ID, 1, &src, nullptr);
-
-	glCompileShader(ID);
-
-	// TODO: Error Handling
-	int result;
-	glGetShaderiv(ID, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE)
-	{
-		int length;
-		glGetShaderiv(ID, GL_INFO_LOG_LENGTH, &length);
-
-		char* messages = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(ID, length, &length, messages);
-		std::cout << "Failed to compile shader!" << 
-			(type == GL_VERTEX_SHADER?  "vertex" : "fragment") << std::endl;
-		std::cout << messages << std::endl;
-		glDeleteShader(ID);
-		return 0;
-	}
-
-	return ID;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-{
-	unsigned int program = glCreateProgram();
-
-	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	
-	glLinkProgram(program);
-	
-	glValidateProgram(program);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program; 
-}
-
-
 
 int main(void)
 {
@@ -133,7 +37,10 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#if __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
 
 	GLFWwindow *window = glfwCreateWindow(960, 540, "Sparrow", NULL, NULL);
 
@@ -175,19 +82,27 @@ int main(void)
 	std::cout << "Info: GPU  vendor : " << glGetString(GL_VENDOR) << std::endl;
 	std::cout << "Info: Renderer    : " << glGetString(GL_RENDERER) << std::endl;
 	std::cout << "Info: ImGui version: " << IMGUI_VERSION;
+
 #ifdef IMGUI_HAS_VIEWPORT
 	std::cout << " +viewport";
 #endif
+
 #ifdef IMGUI_HAS_DOCK
 	std::cout << " +docking";
 #endif
 	std::cout << std::endl << std::endl;
 
+
+
+	//disableCursor(window);
+
 	{ // Vertex-/Index-Buffer scope
 		Renderer renderer;
 
 		test::Test *currentTest = nullptr;
+		
 		test::TestMenu *testMenu = new test::TestMenu(currentTest);
+	
 		currentTest = testMenu;
 
 		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
@@ -195,121 +110,71 @@ int main(void)
 		testMenu->RegisterTest<test::Batching>("Batching");
 		testMenu->RegisterTest<test::BatchingTextures>("Batching Textures");
 		testMenu->RegisterTest<test::BatchingTexturesDynamic>("Batching Textures (dynamic)");
-
-		float positions[] = {
-				-0.5f, -0.5f,
-				0.5f, -0.5f,
-				0.5f, 0.5f,
-				-0.5f, 0.5f
-		};
-
-		unsigned int indices[] = {
-			0,1,2,
-			2,3,0,
-		};
-
-		unsigned int buffer, VAO;
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &buffer);
-
-		glBindVertexArray(VAO);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, buffer);
-		glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STREAM_DRAW);
-		
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-
-		unsigned int ibo;
-		glGenBuffers(1, &ibo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-		ShaderProgramSourceTMP source = ParseShaderSource("res/shaders/Triangle.shader");
-
-		unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource);
-
-		glUseProgram(shader);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		testMenu->RegisterTest<test::TestFlashSquare2D>("Test Flash Square 2D");
+		testMenu->RegisterTest<test::TestGoing3D>("Going 3D");
 
 		bool show_demo_window = false;
 		while (!glfwWindowShouldClose(window))
 		{
 			GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 			
-			glClear(GL_COLOR_BUFFER_BIT);
 
-			glBindVertexArray(VAO);
-			//glDrawArrays(GL_TRIANGLES, 0, 3);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			renderer.Clear();
 
-			// legacy OpenGL, just for debugging
-			//glBegin(GL_TRIANGLES);
-			//	glVertex2f(-0.5f, -0.5f);
-			//	glVertex2f(	 0.f, 0.5f);
-			//	glVertex2f(0.5f, -0.5f);
-			//glEnd();
-			
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
 
-			//renderer.Clear();
+			if (currentTest)
+			{
+				currentTest->OnUpdate();
+				currentTest->OnRender();
+				ImGui::Begin("Test");
+				
+				if (currentTest != testMenu && ImGui::Button("Back"))
+				{ // return to menu
+					delete currentTest;
+					currentTest = testMenu;
+					// Dodge: GL_INVALID_VALUE error generated.
+					//        <program> handle does not refer to an object generated by OpenGL.
+					// on RenderPlatformWindowsDefault()->ImGui_ImplOpenGL3_RenderDrawData() which restores GL state after drawing: `glUseProgram(last_program);`
+					GLCall(glUseProgram(0));
+				}
+				currentTest->OnImGuiRender();
+				ImGui::End();
+			}
 
-			//ImGui_ImplOpenGL3_NewFrame();
-			//ImGui_ImplGlfw_NewFrame();
-			//ImGui::NewFrame();
+			{ // Show a simple window that we create ourselves (use a Begin/End pair to created a named window)
+				ImGui::Checkbox("Demo Window", &show_demo_window);
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			}
 
-			//if (currentTest)
-			//{
-			//	currentTest->OnUpdate();
-			//	currentTest->OnRender();
-			//	ImGui::Begin("Test");
-			//	if (currentTest != testMenu && ImGui::Button("<-"))
-			//	{ // return to menu
-			//		delete currentTest;
-			//		currentTest = testMenu;
-			//		// Dodge: GL_INVALID_VALUE error generated.
-			//		//        <program> handle does not refer to an object generated by OpenGL.
-			//		// on RenderPlatformWindowsDefault()->ImGui_ImplOpenGL3_RenderDrawData() which restores GL state after drawing: `glUseProgram(last_program);`
-			//		GLCall(glUseProgram(0));
-			//	}
-			//	currentTest->OnImGuiRender();
-			//	ImGui::End();
-			//}
+			if (show_demo_window) // Show the big demo window (documentation active samples)
+				ImGui::ShowDemoWindow(&show_demo_window);
 
-			//{ // Show a simple window that we create ourselves (use a Begin/End pair to created a named window)
-			//	ImGui::Checkbox("Demo Window", &show_demo_window);
-			//	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			//}
-
-			//if (show_demo_window) // Show the big demo window (documentation active samples)
-			//	ImGui::ShowDemoWindow(&show_demo_window);
-
-			//ImGui::Render();
-			//ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			//{
-			//	ImGui::UpdatePlatformWindows();
-			//	ImGui::RenderPlatformWindowsDefault();
-			//	glfwMakeContextCurrent(window);
-			//}
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+				glfwMakeContextCurrent(window);
+			}
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
 		} // while (!glfwWindowShouldClose(window))
 
-		glDeleteShader(shader);
-
-		//delete currentTest;
-		//if (currentTest != testMenu)
-		//	delete testMenu;
+		delete currentTest;
+		if (currentTest != testMenu)
+			delete testMenu;
 
 	} // Vertex-/Index-Buffer scope
 
-	//ImGui_ImplOpenGL3_Shutdown();
-	//ImGui_ImplGlfw_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
