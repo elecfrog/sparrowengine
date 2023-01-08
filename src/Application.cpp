@@ -9,6 +9,7 @@
 #include "tests/Test-Batching-Textures-dynamic.hpp"
 #include "tests/Test-FlashSquare2D.hpp"
 #include "tests/Test-Going3D.hpp"
+#include "tests/Test-Lighting.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -112,7 +113,8 @@ int main(void)
 		testMenu->RegisterTest<test::BatchingTexturesDynamic>("Batching Textures (dynamic)");
 		testMenu->RegisterTest<test::TestFlashSquare2D>("Test Flash Square 2D");
 		testMenu->RegisterTest<test::TestGoing3D>("Going 3D");
-
+		testMenu->RegisterTest<test::TestLighting>("Lighting");
+		
 		bool show_demo_window = false;
 		while (!glfwWindowShouldClose(window))
 		{
