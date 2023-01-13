@@ -32,11 +32,9 @@ namespace test
 		bool is_wireFrame = false;
 
 		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 model_2 = model;
 		
 		glm::mat4 view = glm::mat4(1.0f);
 		
-		// left, right, bottom, top, zNear, zFar
 		glm::mat4 proj;
 
 		// Load A Cube Model
@@ -50,18 +48,21 @@ namespace test
 		IBO* cube_IBO;
 		VAO* cube_VAO;
 		MyShader* cube_shader;
+		MyShader* lightBox_shader;
 		//Texture* m_tex0;
 
-		std::vector<float> cube_vertices;
-		std::vector<float> cube_normals;
+		std::vector<RVertex> cube_vertices;
 		std::vector<unsigned int> cube_indices;
 
-
-
+		float cube_translated[3] = { 0.f, 0.0f, 0.5f };
+		glm::mat4 cube_model = glm::mat4(1.0f);
 
 	public:
 		Test03_Box3D()
 		{
+			(glEnable(GL_DEPTH_TEST));
+
+
 			std::vector<float> vertex_data = {
 				// positions          // uv
 				 10.0f,  10.0f, 0.0f,   1.0f, 1.0f, // top right
@@ -100,9 +101,20 @@ namespace test
 			m_shader->Unbind();
 
 			bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "res/OBJFiles/Cube.obj", "res/OBJFiles", true);
-			cube_vertices = attrib.vertices;
-			cube_normals = attrib.normals;
+			const auto& attrib_vertices = attrib.vertices;
+			const auto& cube_normals = attrib.normals;
+			const auto& cube_texCoords = attrib.texcoords;
 
+			std::cout << "attrib.texcoords" << attrib.texcoords.size() << std::endl;
+			
+			for (unsigned int v = 0; v < attrib.vertices.size()/3; ++v)
+			{
+				RVertex tmp_v = RVertex{ 
+					glm::vec3(attrib.vertices[3 * v], attrib.vertices[3 * v + 1], attrib.vertices[3 * v + 2]),
+					glm::vec3(attrib.normals[3 * v], attrib.normals[3 * v + 1],attrib.normals[3 * v+2])
+				};
+				cube_vertices.emplace_back(tmp_v);
+			}
 			// For each shape
 			//printf("Size of shape[%ld].mesh.indices: %lu\n", static_cast<long>(0), static_cast<unsigned long>(shapes[0].mesh.indices.size()));
 
@@ -136,14 +148,19 @@ namespace test
 			cube_IBO = new IBO(cube_indices);
 			// Linking Vertex Attributes
 			cube_VAO->Bind();
-			cube_VAO->LinkAttrib(*cube_VBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
-			cube_shader = new MyShader("res/Shaders/vertex.glsl", "res/Shaders/frag.glsl");
+			cube_VAO->LinkAttrib(*cube_VBO, 0, 3, GL_FLOAT, sizeof(RVertex), (void*)0);
+			cube_VAO->LinkAttrib(*cube_VBO, 1, 3, GL_FLOAT, sizeof(RVertex), (void*)(3* sizeof(float)));
+			
+			cube_shader = new MyShader("res/Shaders/Cube.vert.glsl", "res/Shaders/Cube.frag.glsl");
 			cube_VAO->Unbind();
 			cube_VBO->Unbind();
 			cube_IBO->Unbind();
 			cube_shader->Unbind();
 
 			model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+			lightBox_shader = new MyShader("res/Shaders/Cube.vert.glsl", "res/Shaders/Cube.frag.glsl");
+
 
 			// note that we're translating the scene in the reverse direction of where we want to move
 			view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, eyePos));
@@ -177,23 +194,36 @@ namespace test
 			m_IBO->Unbind();
 			m_shader->Unbind();
 
-			//m_shader->SetUniformMat4f("u_model", model_2);
-			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)nullptr);
-			//cube_shader->SetUniformMat4f("u_model", glm::mat4(1.0f));
-			//cube_shader->SetUniformMat4f("u_view", glm::mat4(1.0f));
 			cube_shader->Bind();
 			cube_VAO->Bind();
 			cube_VBO->Bind();
-			cube_shader->SetUniformMat4f("u_MVP", proj * view * model);
+			cube_model = glm::translate(model, glm::vec3(cube_translated[0], cube_translated[1], cube_translated[2]));
+			cube_shader->SetUniformMat4f("u_MVP", proj * view * cube_model);
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (const void*)nullptr);
+			cube_shader->Unbind();
+			cube_VAO->Unbind();
+			cube_VBO->Unbind();
 
+			lightBox_shader->Bind();
+			cube_VAO->Bind();
+			cube_VBO->Bind();
+			cube_model = glm::translate(model, glm::vec3(cube_translated[0], cube_translated[1], 2.0f));
+			lightBox_shader->SetUniformMat4f("u_MVP", proj * view * cube_model);
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (const void*)nullptr);
+			lightBox_shader->Unbind();
+			cube_VAO->Unbind();
+			cube_VBO->Unbind();
+	
 			view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, eyePos));
 		}
+
+
 		void OnImGuiRender() override 
 		{ 
 			ImGui::Text("Test03-Box3D"); 
 			ImGui::SliderFloat3("Rectangle Color", rectColor, 0.0f, 1.0f);
 			ImGui::SliderFloat("Eye Position", &eyePos, -100.0f, 0.0f);
+			ImGui::SliderFloat3("Cube Position", cube_translated, -5.0f, 5.0f);
 			ImGui::Checkbox("WireFrame", &is_wireFrame);
 		}
 	};

@@ -220,6 +220,13 @@ struct RVertex
 	glm::vec3 normals;
 };
 
+struct DUVertex
+{// basic rendering vertex definition
+	glm::vec3 position;
+	glm::vec3 normals;
+	glm::vec2 texCoord;
+};
+
 
 struct BVertex
 {// basic rendering vertex definition
@@ -284,6 +291,14 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, ID);
 
 		glBufferData(GL_ARRAY_BUFFER, b_vertices.size() * sizeof(BVertex), b_vertices.data(), GL_STATIC_DRAW);
+	}
+
+	VBO(std::vector<RVertex>& r_vertices)
+	{
+		glGenBuffers(1, &ID);
+		glBindBuffer(GL_ARRAY_BUFFER, ID);
+
+		glBufferData(GL_ARRAY_BUFFER, r_vertices.size() * sizeof(RVertex), r_vertices.data(), GL_STATIC_DRAW);
 	}
 
 	~VBO()
