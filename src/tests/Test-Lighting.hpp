@@ -40,7 +40,8 @@ namespace test
 		std::unique_ptr<Shader>			light_shader;
 
 		// TODO: Make a vec3 and RGB, RGBA, RGBValue(0-255) for colors.
-		float lightColorRGB[3] = {1.0f,1.0f, 1.0f};
+		float lightColorRGB[3] = { 1.0f, 1.0f, 1.0f };
+		float lightPos[3] = { 0.5f, 0.5f, 0.5f };
 		
 		// MainCamera for Viewport rendering.
 		std::unique_ptr<Camera> mainCamera;
@@ -67,23 +68,38 @@ namespace test
 		{
 			// Pyramid Vertices coordinates
 			float vertices[] =
-			{ //     COORDINATES     /        COLORS      /   TexCoord  //
-				-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-				-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-				 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
-				 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
-				 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+			{ //     COORDINATES     /        COLORS          /    TexCoord   /        NORMALS       //
+				-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+				-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+				 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 5.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+				 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, -1.0f, 0.0f, // Bottom side
+
+				-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+				-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+				 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,     -0.8f, 0.5f,  0.0f, // Left Side
+
+				-0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+				 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+				 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f, -0.8f, // Non-facing side
+
+				 0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	 0.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+				 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.8f, 0.5f,  0.0f, // Right side
+				 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.8f, 0.5f,  0.0f, // Right side
+
+				 0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	 5.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+				-0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f, 	 0.0f, 0.0f,      0.0f, 0.5f,  0.8f, // Facing side
+				 0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	 2.5f, 5.0f,      0.0f, 0.5f,  0.8f  // Facing side
 			};
 
 			// Indices for vertices order
 			unsigned int indices[] =
 			{
-				0, 1, 2,
-				0, 2, 3,
-				0, 1, 4,
-				1, 2, 4,
-				2, 3, 4,
-				3, 0, 4
+				0, 1, 2, // Bottom side
+				0, 2, 3, // Bottom side
+				4, 6, 5, // Left side
+				7, 9, 8, // Non-facing side
+				10, 12, 11, // Right side
+				13, 15, 14 // Facing side
 			};
 
 			// Light Box Vertices coordinates
@@ -124,13 +140,14 @@ namespace test
 			{ // init pyramid object
 				pyramid_vao = std::make_unique<VertexArray>();
 				static_assert(sizeof(float) == sizeof(std::remove_extent_t<decltype(vertices)>));
-				pyramid_vbo = std::make_unique<VertexBuffer>(vertices, unsigned(5 * 8 * sizeof(std::remove_extent_t<decltype(vertices)>)));
+				pyramid_vbo = std::make_unique<VertexBuffer>(vertices, unsigned( 176 * sizeof(std::remove_extent_t<decltype(vertices)>)));
 				VertexBufferLayout layout;
 
 				layout.Push<float>(3);
 				layout.Push<float>(3);
 				layout.Push<float>(2);
-
+				layout.Push<float>(3);
+				
 				pyramid_vao->AddBuffer(*pyramid_vbo, layout);
 				pyramid_ibo = std::make_unique<IndexBuffer>(indices, 18);
 				m_texture = std::make_unique<Texture>("res/textures/brick.png");
@@ -190,16 +207,32 @@ namespace test
 			// Handles camera inputs
 			//mainCamera->Inputs(current_window);
 
-			glm::mat4 model = glm::rotate(m_model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-			mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
-			mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
-			m_proj = mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
-			m_view = mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
-
-			glm::mat4 mvp = m_proj * m_view * model;
 
 			// Rendering Attributes Setting:
-			glm::vec4 lightColor = glm::vec4(lightColorRGB[0], lightColorRGB[1], lightColorRGB[2], 1.0f);
+
+				/*
+				* Setting Model Transformations towards each object at first.
+				*/
+				glm::mat4 pyramid_model = glm::rotate(m_model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::mat4 lightbox_model = glm::translate(m_model, glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
+
+				glm::mat4 mvp = m_proj * m_view * pyramid_model;
+
+
+				/*
+				* Setting Camera.
+				*/
+				mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
+				mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
+				m_proj = mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
+				m_view = mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
+
+
+				/*
+				* Setting Light Attributes.
+				*/
+
+				glm::vec4 lightColor = glm::vec4(lightColorRGB[0], lightColorRGB[1], lightColorRGB[2], 1.0f);
 
 			{ // render the pyramid
 				m_texture->Bind(0);
@@ -207,13 +240,15 @@ namespace test
 				pyramid_shader->SetUniformMat4f("u_MVP", mvp);
 				pyramid_shader->SetUniform1i("u_Texture", 0);
 				pyramid_shader->SetUniform4f("u_lightColor", lightColor);
-				
+				pyramid_shader->SetUniformMat4f("u_Model", pyramid_model);
+				pyramid_shader->SetUniform3f("u_lightPos", glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
+				pyramid_shader->SetUniform3f("u_cameraPos", glm::vec3(mainCamera->Position.x, mainCamera->Position.y, mainCamera->Position.z));
+
 				m_renderer.Draw(*pyramid_vao, *pyramid_ibo, *pyramid_shader);
 			}
 
 			
 			{	// render light box.
-				glm::mat4 lightbox_model = glm::translate(m_model, glm::vec3(0.5f, 0.5f, 0.5f));
 								
 				mvp = m_proj * m_view * lightbox_model;
 				light_shader->Bind();
@@ -229,7 +264,8 @@ namespace test
 
 			ImGui::Text("Using Keyboard W/S/A/D/CTRL/SPACE to control the camera");
 			ImGui::SliderFloat3("Light Color", lightColorRGB, 0.0f, 1.0f);
-			 // Handles key inputs
+			ImGui::SliderFloat3("Light Position", lightPos, 0.0f, 1.0f);
+			// Handles key inputs
 			if (ImGui::IsKeyPressed('W'))
 			{
 				mainCamera->Position += mainCamera->speed * mainCamera->Orientation;

@@ -10,6 +10,12 @@
 #include "tests/Test-FlashSquare2D.hpp"
 #include "tests/Test-Going3D.hpp"
 #include "tests/Test-Lighting.hpp"
+#include "tests/Test10-SpecularMaps.hpp"
+#include "tests/Test11-TypesofLight.hpp"
+#include "tests/Test01-DrawATriangle.hpp"
+#include "tests/Test01Ex-DrawARect.hpp"
+#include "tests/Test02-TextureBox2D.hpp"
+#include "tests/Test03-Box3D.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,6 +29,9 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int main(void)
 {
@@ -52,6 +61,7 @@ int main(void)
 	}
 
 	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSwapInterval(1);
 
 	// Init GLEW (run-time OpenGL extensions loader)
@@ -106,6 +116,11 @@ int main(void)
 	
 		currentTest = testMenu;
 
+
+		testMenu->RegisterTest<test::Test01_DrawATriangle>("Test01 Draw A Triangle");
+		testMenu->RegisterTest<test::Test01Ex_DrawARect>("Test01-Ex Draw A Rect");
+		testMenu->RegisterTest<test::Test02_TextureBox2D>("Test02 Texture Box2D");
+		testMenu->RegisterTest<test::Test03_Box3D>("Test02 Box3D");
 		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 		testMenu->RegisterTest<test::TestTexture2D>("Texture 2D");
 		testMenu->RegisterTest<test::Batching>("Batching");
@@ -114,6 +129,8 @@ int main(void)
 		testMenu->RegisterTest<test::TestFlashSquare2D>("Test Flash Square 2D");
 		testMenu->RegisterTest<test::TestGoing3D>("Going 3D");
 		testMenu->RegisterTest<test::TestLighting>("Lighting");
+		testMenu->RegisterTest<test::Test10_SpecularMaps>("Test_10 SpecularMaps");
+		testMenu->RegisterTest<test::Test11_TypesofLight>("Test_11 Types of Light");
 		
 		bool show_demo_window = false;
 		while (!glfwWindowShouldClose(window))
@@ -180,4 +197,12 @@ int main(void)
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
+}
+
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	// make sure the viewport matches the new window dimensions; note that width and 
+	// height will be significantly larger than specified on retina displays.
+	glViewport(0, 0, width, height);
 }
