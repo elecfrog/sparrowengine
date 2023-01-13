@@ -14,8 +14,9 @@
 #include "tests/Test11-TypesofLight.hpp"
 #include "tests/Test01-DrawATriangle.hpp"
 #include "tests/Test01Ex-DrawARect.hpp"
-#include "tests/Test02-TextureBox2D.hpp"
-#include "tests/Test03-Box3D.hpp"
+//#include "tests/Test02-TextureBox2D.hpp"
+//#include "tests/Test03-Box3D.hpp"
+#include "tests/Test04-LightBox3D.hpp"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -104,7 +105,6 @@ int main(void)
 	std::cout << std::endl << std::endl;
 
 
-
 	//disableCursor(window);
 
 	{ // Vertex-/Index-Buffer scope
@@ -119,8 +119,9 @@ int main(void)
 
 		testMenu->RegisterTest<test::Test01_DrawATriangle>("Test01 Draw A Triangle");
 		testMenu->RegisterTest<test::Test01Ex_DrawARect>("Test01-Ex Draw A Rect");
-		testMenu->RegisterTest<test::Test02_TextureBox2D>("Test02 Texture Box2D");
-		testMenu->RegisterTest<test::Test03_Box3D>("Test02 Box3D");
+		//testMenu->RegisterTest<test::Test02_TextureBox2D>("Test02 Texture Box2D");
+		//testMenu->RegisterTest<test::Test03_Box3D>("Test03 Box3D");
+		testMenu->RegisterTest<test::Test04_LightBox3D>("Test04 LightBox3D");
 		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 		testMenu->RegisterTest<test::TestTexture2D>("Texture 2D");
 		testMenu->RegisterTest<test::Batching>("Batching");

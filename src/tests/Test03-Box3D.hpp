@@ -51,10 +51,10 @@ namespace test
 		MyShader* lightBox_shader;
 		//Texture* m_tex0;
 
-		std::vector<RVertex> cube_vertices;
+		std::vector<DUVertex> cube_vertices;
 		std::vector<unsigned int> cube_indices;
 
-		float cube_translated[3] = { 0.f, 0.0f, 0.5f };
+		float cube_translated[3] = { 0.0f, 1.5f, 0.0f };
 		glm::mat4 cube_model = glm::mat4(1.0f);
 
 	public:
@@ -101,17 +101,16 @@ namespace test
 			m_shader->Unbind();
 
 			bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, "res/OBJFiles/Cube.obj", "res/OBJFiles", true);
-			const auto& attrib_vertices = attrib.vertices;
-			const auto& cube_normals = attrib.normals;
-			const auto& cube_texCoords = attrib.texcoords;
-
-			std::cout << "attrib.texcoords" << attrib.texcoords.size() << std::endl;
+			const auto& _vertices = attrib.vertices;
+			const auto& _normals = attrib.normals;
+			const auto& _texCoords = attrib.texcoords;
 			
 			for (unsigned int v = 0; v < attrib.vertices.size()/3; ++v)
 			{
-				RVertex tmp_v = RVertex{ 
-					glm::vec3(attrib.vertices[3 * v], attrib.vertices[3 * v + 1], attrib.vertices[3 * v + 2]),
-					glm::vec3(attrib.normals[3 * v], attrib.normals[3 * v + 1],attrib.normals[3 * v+2])
+				DUVertex tmp_v = DUVertex{
+					glm::vec3(_vertices[3 * v], _vertices[3 * v + 1], _vertices[3 * v + 2]),
+					glm::vec3(_normals[3 * v], _normals[3 * v + 1], _normals[3 * v+2]),
+					glm::vec2(_texCoords[2 * v], _texCoords[2 * v + 1])
 				};
 				cube_vertices.emplace_back(tmp_v);
 			}
@@ -148,8 +147,9 @@ namespace test
 			cube_IBO = new IBO(cube_indices);
 			// Linking Vertex Attributes
 			cube_VAO->Bind();
-			cube_VAO->LinkAttrib(*cube_VBO, 0, 3, GL_FLOAT, sizeof(RVertex), (void*)0);
-			cube_VAO->LinkAttrib(*cube_VBO, 1, 3, GL_FLOAT, sizeof(RVertex), (void*)(3* sizeof(float)));
+			cube_VAO->LinkAttrib(*cube_VBO, 0, 3, GL_FLOAT, sizeof(DUVertex), (void*)0);
+			cube_VAO->LinkAttrib(*cube_VBO, 1, 3, GL_FLOAT, sizeof(DUVertex), (void*)(3* sizeof(float)));
+			cube_VAO->LinkAttrib(*cube_VBO, 2, 2, GL_FLOAT, sizeof(DUVertex), (void*)(3* sizeof(float)));
 			
 			cube_shader = new MyShader("res/Shaders/Cube.vert.glsl", "res/Shaders/Cube.frag.glsl");
 			cube_VAO->Unbind();

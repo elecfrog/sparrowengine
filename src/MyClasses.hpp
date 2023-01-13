@@ -83,6 +83,11 @@ public:
 		(glUniform4f(GetUniformLocation(name), _vec.x, _vec.y, _vec.z, _vec.w));
 	}
 
+	void SetUniform1f(const std::string& name, float _val)
+	{
+		(glUniform1f(GetUniformLocation(name), _val));
+	}
+
 	void SetUniform3f(const std::string& name, glm::vec3 _vec)
 	{
 		(glUniform3f(GetUniformLocation(name), _vec.x, _vec.y, _vec.z));
@@ -213,7 +218,6 @@ private:
 	}
 };
 
-
 struct RVertex
 {// basic rendering vertex definition
 	glm::vec3 position;
@@ -232,6 +236,13 @@ struct BVertex
 {// basic rendering vertex definition
 	glm::vec3 position;
 	glm::vec2 texCoord;
+};
+
+struct AttribVertex
+{
+	glm::vec3 position;
+	glm::vec3 normals;
+	glm::vec2 texCoords;
 };
 
 class VBO
@@ -301,6 +312,22 @@ public:
 		glBufferData(GL_ARRAY_BUFFER, r_vertices.size() * sizeof(RVertex), r_vertices.data(), GL_STATIC_DRAW);
 	}
 
+	VBO(std::vector<DUVertex>& r_vertices)
+	{
+		glGenBuffers(1, &ID);
+		glBindBuffer(GL_ARRAY_BUFFER, ID);
+
+		glBufferData(GL_ARRAY_BUFFER, r_vertices.size() * sizeof(DUVertex), r_vertices.data(), GL_STATIC_DRAW);
+	}
+
+	VBO(std::vector<AttribVertex>& r_vertices)
+	{
+		glGenBuffers(1, &ID);
+		glBindBuffer(GL_ARRAY_BUFFER, ID);
+
+		glBufferData(GL_ARRAY_BUFFER, r_vertices.size() * sizeof(AttribVertex), r_vertices.data(), GL_STATIC_DRAW);
+	}
+
 	~VBO()
 	{
 		glDeleteBuffers(1, &ID);
@@ -368,7 +395,7 @@ public:
 	VAO()
 	{
 		glGenVertexArrays(1, &ID);
-		Bind();
+		//Bind();
 	}
 
 	~VAO()
@@ -394,5 +421,55 @@ public:
 		VBO.Unbind();
 	}
 
+};
+
+
+class MyCamera
+{
+public:
+	glm::mat4 model; 
+	glm::mat4 view;
+	glm::mat4 proj;
+
+	glm::vec3 position;
+
+	MyCamera():
+		model(glm::mat4(1.0f)), 
+		view(glm::mat4(1.0f)), 
+		proj(glm::mat4(1.0f)), 
+		position(glm::vec3(0.f, 0.f,0.f))
+	{}
+
+	void SetView(glm::mat4 _view)
+	{
+		this->view = _view;
+	}	
+
+	glm::vec3 GetViewPos()
+	{
+		
+	
+	}
+
+	void TranslateCamera(glm::vec3 _trans)
+	{
+		SetView(glm::translate(glm::mat4(1.0f), _trans));
+	}
+};
+
+class Light
+{
+public:
+	float k_ambient;
+	float k_diffuse;
+	float k_specular;
+
+	int specular_intensity;
+	Light():
+		k_ambient(0.1f),
+		k_diffuse(0.5f),
+		k_specular(0.5f),
+		specular_intensity(32)
+	{}
 };
 #endif
