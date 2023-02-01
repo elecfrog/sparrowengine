@@ -8,7 +8,7 @@
 #include "VertexBufferLayout.hpp"
 #include "Texture.h"
 #include "IndexBuffer.h"
-#include "Camera.h"
+#include "common/Camera.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -96,8 +96,8 @@ namespace test
 
 			m_shader  = std::make_unique<Shader>("res/shaders/Going3D.shader");
 
-			m_camera  = std::make_unique<Camera>(800, 800, glm::vec3(0.0f, 0.0f, 5.0f));
-
+			m_camera  = std::make_unique<Camera>();
+            m_camera->UpdateVPMatrices();
 			//m_shader->Bind();
 			//m_shader->SetUniform1i("u_Texture", 0);
 
@@ -127,12 +127,10 @@ namespace test
 			m_texture->Bind(0);
 			{	// render the first texture
 				glm::mat4 model = glm::rotate(m_model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-				m_camera->ProjMatrix(45.0f, 0.1f, 100.0f);
-				m_camera->ViewMatrix(45.0f, 0.1f, 100.0f);
 
 
-				m_proj = m_camera->ProjMatrix(45.0f, 0.1f, 100.0f);
-				m_view = m_camera->ViewMatrix(45.0f, 0.1f, 100.0f);
+				m_proj = m_camera->GetProjMatrix();
+				m_view = m_camera->GetViewMatrix();
 
 				glm::mat4 mvp = m_proj * m_view * model;
 
@@ -150,39 +148,39 @@ namespace test
 			
 			ImGui::Text("Using Keyboard WASD to control the camera");
 
-			// Handles key inputs
-			if (ImGui::IsKeyPressed('W'))
-			{
-				m_camera->Position += m_camera->speed * m_camera->Orientation;
-			}
-			if (ImGui::IsKeyPressed('A'))
-			{
-				m_camera->Position += m_camera->speed * -glm::normalize(glm::cross(m_camera->Orientation, m_camera->Up));;
-			}
-			if (ImGui::IsKeyPressed('S'))
-			{
-				m_camera->Position += m_camera->speed * -m_camera->Orientation;
-			}
-			if (ImGui::IsKeyPressed('D'))
-			{
-				m_camera->Position += m_camera->speed * glm::normalize(glm::cross(m_camera->Orientation, m_camera->Up));
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_Space))
-			{
-				m_camera->Position += m_camera->speed * m_camera->Up;
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_LeftCtrl))
-			{
-				m_camera->Position += m_camera->speed * -m_camera->Up;
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_LeftShift))
-			{
-				m_camera->speed = 0.4f;
-			}
-			else if (ImGui::IsKeyReleased(ImGuiKey_LeftShift))
-			{
-				m_camera->speed = 0.1f;
-			}
+//			// Handles key inputs
+//			if (ImGui::IsKeyPressed('W'))
+//			{
+//				m_camera->Position += m_camera->speed * m_camera->Orientation;
+//			}
+//			if (ImGui::IsKeyPressed('A'))
+//			{
+//				m_camera->Position += m_camera->speed * -glm::normalize(glm::cross(m_camera->Orientation, m_camera->Up));;
+//			}
+//			if (ImGui::IsKeyPressed('S'))
+//			{
+//				m_camera->Position += m_camera->speed * -m_camera->Orientation;
+//			}
+//			if (ImGui::IsKeyPressed('D'))
+//			{
+//				m_camera->Position += m_camera->speed * glm::normalize(glm::cross(m_camera->Orientation, m_camera->Up));
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_Space))
+//			{
+//				m_camera->Position += m_camera->speed * m_camera->Up;
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_LeftCtrl))
+//			{
+//				m_camera->Position += m_camera->speed * -m_camera->Up;
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_LeftShift))
+//			{
+//				m_camera->speed = 0.4f;
+//			}
+//			else if (ImGui::IsKeyReleased(ImGuiKey_LeftShift))
+//			{
+//				m_camera->speed = 0.1f;
+//			}
 
 
 			//// Handles mouse inputs

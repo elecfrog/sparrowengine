@@ -8,7 +8,7 @@
 #include "VertexBufferLayout.hpp"
 #include "Texture.h"
 #include "IndexBuffer.h"
-#include "Camera.h"
+#include "common/Camera.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -182,7 +182,7 @@ namespace test
 			}
 
 			// init main camera right now.
-			mainCamera  = std::make_unique<Camera>(800, 800, glm::vec3(0.0f, 0.0f, 5.0f));
+			mainCamera  = std::make_unique<Camera>();
 
 			//pyramid_shader->Bind();
 			//pyramid_shader->SetUniform1i("u_Texture", 0);
@@ -222,10 +222,8 @@ namespace test
 				/*
 				* Setting Camera.
 				*/
-				mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
-				mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
-				m_proj = mainCamera->ProjMatrix(45.0f, 0.1f, 100.0f);
-				m_view = mainCamera->ViewMatrix(45.0f, 0.1f, 100.0f);
+                m_proj = mainCamera->GetProjMatrix();
+                m_view = mainCamera->GetViewMatrix();
 
 
 				/*
@@ -242,7 +240,7 @@ namespace test
 				pyramid_shader->SetUniform4f("u_lightColor", lightColor);
 				pyramid_shader->SetUniformMat4f("u_Model", pyramid_model);
 				pyramid_shader->SetUniform3f("u_lightPos", glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
-				pyramid_shader->SetUniform3f("u_cameraPos", glm::vec3(mainCamera->Position.x, mainCamera->Position.y, mainCamera->Position.z));
+				pyramid_shader->SetUniform3f("u_cameraPos", glm::vec3(mainCamera->cameraPos.x, mainCamera->cameraPos.y, mainCamera->cameraPos.z));
 
 				m_renderer.Draw(*pyramid_vao, *pyramid_ibo, *pyramid_shader);
 			}
@@ -266,38 +264,38 @@ namespace test
 			ImGui::SliderFloat3("Light Color", lightColorRGB, 0.0f, 1.0f);
 			ImGui::SliderFloat3("Light Position", lightPos, 0.0f, 1.0f);
 			// Handles key inputs
-			if (ImGui::IsKeyPressed('W'))
-			{
-				mainCamera->Position += mainCamera->speed * mainCamera->Orientation;
-			}
-			if (ImGui::IsKeyPressed('A'))
-			{
-				mainCamera->Position += mainCamera->speed * -glm::normalize(glm::cross(mainCamera->Orientation, mainCamera->Up));;
-			}
-			if (ImGui::IsKeyPressed('S'))
-			{
-				mainCamera->Position += mainCamera->speed * -mainCamera->Orientation;
-			}
-			if (ImGui::IsKeyPressed('D'))
-			{
-				mainCamera->Position += mainCamera->speed * glm::normalize(glm::cross(mainCamera->Orientation, mainCamera->Up));
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_Space))
-			{
-				mainCamera->Position += mainCamera->speed * mainCamera->Up;
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_LeftCtrl))
-			{
-				mainCamera->Position += mainCamera->speed * -mainCamera->Up;
-			}
-			if (ImGui::IsKeyPressed(ImGuiKey_LeftShift))
-			{
-				mainCamera->speed = 0.4f;
-			}
-			else if (ImGui::IsKeyReleased(ImGuiKey_LeftShift))
-			{
-				mainCamera->speed = 0.1f;
-			}
+//			if (ImGui::IsKeyPressed('W'))
+//			{
+//				mainCamera->Position += mainCamera->speed * mainCamera->Orientation;
+//			}
+//			if (ImGui::IsKeyPressed('A'))
+//			{
+//				mainCamera->Position += mainCamera->speed * -glm::normalize(glm::cross(mainCamera->Orientation, mainCamera->Up));;
+//			}
+//			if (ImGui::IsKeyPressed('S'))
+//			{
+//				mainCamera->Position += mainCamera->speed * -mainCamera->Orientation;
+//			}
+//			if (ImGui::IsKeyPressed('D'))
+//			{
+//				mainCamera->Position += mainCamera->speed * glm::normalize(glm::cross(mainCamera->Orientation, mainCamera->Up));
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_Space))
+//			{
+//				mainCamera->Position += mainCamera->speed * mainCamera->Up;
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_LeftCtrl))
+//			{
+//				mainCamera->Position += mainCamera->speed * -mainCamera->Up;
+//			}
+//			if (ImGui::IsKeyPressed(ImGuiKey_LeftShift))
+//			{
+//				mainCamera->speed = 0.4f;
+//			}
+//			else if (ImGui::IsKeyReleased(ImGuiKey_LeftShift))
+//			{
+//				mainCamera->speed = 0.1f;
+//			}
 
 		}
 	};

@@ -3,7 +3,10 @@
 
 #include <filesystem>
 #include <unordered_map>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class MyShader
 {
@@ -460,16 +463,63 @@ public:
 class Light
 {
 public:
-	float k_ambient;
-	float k_diffuse;
-	float k_specular;
+	glm::vec3 k_ambient;
+	glm::vec3 k_diffuse;
+	glm::vec3 k_specular;
 
-	int specular_intensity;
-	Light():
-		k_ambient(0.1f),
-		k_diffuse(0.5f),
-		k_specular(0.5f),
-		specular_intensity(32)
+	glm::vec3 position;
+	glm::vec3 direction;
+	glm::vec3 color;
+
+	float p_constant;
+	float p_linear;
+	float p_quadratic;
+
+	float s_cutOffAngle;
+
+	enum LightType
+	{
+		Directional = 0,
+		Point = 1,
+		Spot = 2
+	};
+
+	Light() :
+		position(glm::vec3(0.1f, 0.1f, 0.1f)),
+		color(glm::vec3(1.0f)),
+		k_ambient(glm::vec3(0.1f, 0.1f, 0.1f)),
+		k_diffuse(glm::vec3(1.0f, 1.0f, 1.0f)),
+		k_specular(glm::vec3(0.1f, 0.1f, 0.1f)),
+		direction(glm::vec3(0.0f)),
+		p_constant(1.0f),
+		p_linear(0.7f),
+		p_quadratic(1.8f),
+		s_cutOffAngle(12.5f)
+	{}
+
+	void ComputeDirection(glm::vec3 _objPosition)
+	{
+		direction = position - _objPosition;
+	}	
+	float GetCutOffAngle(float _angle)
+	{
+		return glm::cos(glm::radians(s_cutOffAngle));
+	}
+};
+
+class Material
+{
+public:
+	glm::vec3 k_ambient;
+	glm::vec3 k_diffuse;
+	glm::vec3 k_specular;
+
+	float shininess;
+	Material() :
+		k_ambient(glm::vec3(0.1f, 0.1f, 0.1f)),
+		k_diffuse(glm::vec3(1.0f, 1.0f, 1.0f)),
+		k_specular(glm::vec3(0.1f, 0.1f, 0.1f)),
+		shininess(100.0f)
 	{}
 };
 #endif
