@@ -35,7 +35,7 @@ namespace test
 		bool reloadShaders = false;
 		
 		float lightColor[3] = { 1.0f, 1.0f, 1.0f };
-        float lightPos[3] = { 1.2f, 1.0f, 2.0f };
+        float lightPos[3] = { 0.0f, 0.836f, 2.889f };
 
         glm::vec3 cubePosition = glm::vec3( 0.0f,  0.0f,  0.0f);
 
@@ -179,19 +179,6 @@ namespace test
 			
 			m_Shader->Bind();
 
-            // Lighting Relevant
-			m_Shader->SetUniform3f("lightColor", lightColor[0], lightColor[1], lightColor[2]);
-            m_Shader->SetUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
-            m_Shader->SetUniform3f("viewPos", m_camera.cameraPos);
-
-            m_Shader->SetUniform3f("lit.ambient",  0.2f, 0.2f, 0.2f);
-            m_Shader->SetUniform3f("lit.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
-            m_Shader->SetUniform3f("lit.specular", 1.0f, 1.0f, 1.0f);
-            // Setting Materials
-			m_Shader->SetUniform1i("rt.container", 0);
-			m_Shader->SetUniform1i("rt.elecfrog", 1);
-			m_Shader->SetUniform1i("rt.container_s", 2);
-			m_Shader->SetUniform1i("rt.container_e", 3);
 
 
             glm::mat4 view = m_camera.GetViewMatrix();
@@ -200,7 +187,7 @@ namespace test
             glm::mat4 proj = m_camera.GetProjMatrix();
             m_Shader->SetUniformMat4f("P", proj);
 
-			glBindVertexArray(rectVAO);
+            glBindVertexArray(rectVAO);
 //			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (const void*)nullptr);
 
             glm::mat4 model = glm::mat4(1.0f);
@@ -208,6 +195,22 @@ namespace test
             float angle = 20.0f;
             model = glm::rotate(model, glm::radians(angle) * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
             m_Shader->SetUniformMat4f("M", model);
+
+            // Lighting Relevant
+            m_Shader->SetUniform3f("lightColor", lightColor[0], lightColor[1], lightColor[2]);
+            m_Shader->SetUniform3f("lightPos", lightPos[0],lightPos[1],lightPos[2]);
+            m_Shader->SetUniform3f("viewPos", m_camera.cameraPos);
+            glm::vec3 lightDirection = glm::vec4(lightPos[0],lightPos[1],lightPos[2],1.0f) - model * glm::vec4(cubePosition,1.0f);
+            m_Shader->SetUniform3f("lit.direction", lightDirection);
+
+            m_Shader->SetUniform3f("lit.ambient",  0.2f, 0.2f, 0.2f);
+            m_Shader->SetUniform3f("lit.diffuse",  0.5f, 0.5f, 0.5f); // 将光照调暗了一些以搭配场景
+            m_Shader->SetUniform3f("lit.specular", 1.0f, 1.0f, 1.0f);
+            // Setting Materials
+            m_Shader->SetUniform1i("rt.container", 0);
+            m_Shader->SetUniform1i("rt.elecfrog", 1);
+            m_Shader->SetUniform1i("rt.container_s", 2);
+            m_Shader->SetUniform1i("rt.container_e", 3);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
 
